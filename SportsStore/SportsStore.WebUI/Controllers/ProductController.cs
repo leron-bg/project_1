@@ -21,11 +21,12 @@
             return View();
         }
 
-		public ViewResult List(int page = 1)
+		public ViewResult List(string category, int page = 1)
 		{
 			var model = new ProductsListViewModel
 			{
 				Products = _repository.Products
+					.Where(p => category == null || p.Category == category)
 					.OrderBy(p => p.ProductID)
 					.Skip((page - 1) * pageSize)
 					.Take(pageSize),
@@ -33,8 +34,11 @@
 				{
 					CurrentPage = page,
 					ItemsPerPage = pageSize,
-					TotalItems = _repository.Products.Count()
-				}
+					TotalItems = category == null ?
+						_repository.Products.Count() :
+						_repository.Products.Count(e => e.Category == category)
+				},
+				CurrentCategory = category
 			};
 
 			return View(model);
